@@ -1,5 +1,8 @@
 package com.slipenk.clearsolutionstesttask.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.slipenk.clearsolutionstesttask.entity.User;
 import com.slipenk.clearsolutionstesttask.exceptions.UserNotFoundException;
 import com.slipenk.clearsolutionstesttask.service.UserService;
@@ -9,8 +12,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -71,20 +76,26 @@ public class UserController {
                 .body(newUser);
     }
 
-    /*
-    "Update one/some user fields" and "Update all user fields".
-    The best approach here is because we still have validation of fields.
-    To update one or some fields - get the existing user and change appropriate data.
-    De jure, we will update all fields, de facto - only needed.
-    */
-    @PutMapping
-    public ResponseEntity<User> updateUser(@Valid @RequestBody User user) {
-        checkUserPresence(user.getId());
+    @PutMapping(ID_PATH)
+    public ResponseEntity<User> updateUser(@PathVariable long id, @Valid @RequestBody User user) {
+        checkUserPresence(id);
+        user.setId(id);
         User updatedUser = userService.addUser(user);
         return ResponseEntity.status(HttpStatus.OK)
                 .header(LOCATION, USERS_PATH + SLASH + updatedUser.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(updatedUser);
+    }
+
+    @PatchMapping(ID_PATH)
+    public ResponseEntity<User> updateUserSomeFields(@PathVariable long id, @RequestBody JsonPatch patch) throws JsonPatchException, JsonProcessingException, MethodArgumentNotValidException, NoSuchMethodException {
+        User user = userService.findById(id);
+        checkUserPresence(id);
+        User patchedUser = userService.applyPatchToCustomer(patch, user);
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(LOCATION, USERS_PATH + SLASH + patchedUser.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(patchedUser);
     }
 
     @DeleteMapping(ID_PATH)

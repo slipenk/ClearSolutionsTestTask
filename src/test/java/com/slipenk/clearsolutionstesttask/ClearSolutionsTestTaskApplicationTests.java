@@ -29,6 +29,7 @@ import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.INVALID_L
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.IT_ALLOWS_TO_REGISTER;
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.LAST_NAME_IS_MANDATORY;
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.LOCATION;
+import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.PATCH_JSON;
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.SLASH;
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.TEST_ADDRESS_FIELD;
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.TEST_BIRTH_DATE_FIELD;
@@ -39,6 +40,8 @@ import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.TEST_LAST
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.TEST_NOT_VALID_EMAIL_WITHOUT_AT;
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.TEST_NOT_VALID_EMAIL_WITHOUT_DOT;
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.TEST_PHONE_NUMBER_FIELD;
+import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.TEST_UPDATED_EMAIL_1;
+import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.TEST_UPDATED_WRONG_EMAIL_1;
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.TEST_USER_ADDRESS_1;
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.TEST_USER_ADDRESS_2;
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.TEST_USER_BIRTH_DATE_1;
@@ -63,6 +66,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -364,6 +368,44 @@ class ClearSolutionsTestTaskApplicationTests {
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(UserAgeValidationException.class, result.getResolvedException()))
                 .andExpect(result -> assertEquals(IT_ALLOWS_TO_REGISTER + userAge + YEARS_OLD, Objects.requireNonNull(result.getResolvedException()).getMessage()));
+    }
+
+    @Test
+    void updatePartialUserEmail() throws Exception {
+        String body = "[{" +
+                "\"op\": \"replace\"," +
+                "\"path\": \"/email\"," +
+                "\"value\": \"" + TEST_UPDATED_EMAIL_1 + "\"" +
+                "}]";
+
+        mockMvc.perform(patch(USERS_PATH + SLASH + 1)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE + PATCH_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath(TEST_ID_FIELD, notNullValue()))
+                .andExpect(jsonPath(TEST_EMAIL_FIELD, is(TEST_UPDATED_EMAIL_1)))
+                .andExpect(jsonPath(TEST_FIRST_NAME_FIELD, is(TEST_USER_FIRST_NAME_1)))
+                .andExpect(jsonPath(TEST_LAST_NAME_FIELD, is(TEST_USER_LAST_NAME_1)))
+                .andExpect(jsonPath(TEST_BIRTH_DATE_FIELD, is(TEST_USER_BIRTH_DATE_1)))
+                .andExpect(jsonPath(TEST_ADDRESS_FIELD, is(TEST_USER_ADDRESS_1)))
+                .andExpect(jsonPath(TEST_PHONE_NUMBER_FIELD, is(TEST_USER_PHONE_NUMBER_1)));
+    }
+
+    @Test
+    void updatePartialUserWrongEmail() throws Exception {
+        String body = "[{" +
+                "\"op\": \"replace\"," +
+                "\"path\": \"/email\"," +
+                "\"value\": \"" + TEST_UPDATED_WRONG_EMAIL_1 + "\"" +
+                "}]";
+
+        mockMvc.perform(patch(USERS_PATH + SLASH + 1)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE + PATCH_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
+                .andExpect(jsonPath(TEST_EMAIL_FIELD, is(EMAIL_IS_NOT_VALID)));
     }
 
     private int extractIdFromLocation(String locationHeader) {

@@ -4,9 +4,12 @@ public class Dictionary {
 
     public static final String SLASH = "/";
     public static final String DOT = ".";
-    public static final String EMPTY_STRING = "";
+    public static final String EMPTY_STRING = " ";
+    public static final String PATCH_JSON = "-patch+json";
 
     public static final String USERS = "users";
+    public static final String USER = "user";
+    public static final String VALIDATE_USER = "validateUser";
 
     //attributes
     public static final String ID = "id";
@@ -48,6 +51,8 @@ public class Dictionary {
     public static final String TEST_ADDRESS_FIELD = "$.address";
     public static final String TEST_PHONE_NUMBER_FIELD = "$.phoneNumber";
     public static final String TEST_USER_EMAIL_1 = "salah@gmail.com";
+    public static final String TEST_UPDATED_EMAIL_1 = "salah92@gmail.com";
+    public static final String TEST_UPDATED_WRONG_EMAIL_1 = "salah92gmail.com";
     public static final String TEST_USER_FIRST_NAME_1 = "Mohamed";
     public static final String TEST_USER_LAST_NAME_1 = "Salah";
     public static final String TEST_USER_BIRTH_DATE_1 = "1992-06-15";
