@@ -122,6 +122,7 @@ class ClearSolutionsTestTaskApplicationTests {
     private final Long idForUpdateAndDelete = 1L;
     private final Long idForNonExistenceUser = 10L;
     private MockMvc mockMvc;
+
     @Value(USER_AGE_PROPS)
     private int userAge;
 
@@ -136,8 +137,8 @@ class ClearSolutionsTestTaskApplicationTests {
     @Order(1)
     void testGetUserById() throws Exception {
         ResultActions resultActions = mockMvc
-                .perform(
-                        get(USERS_PATH + ID_PATH, idForUpdateAndDelete))
+                .perform(get(USERS_PATH + ID_PATH, idForUpdateAndDelete)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath(TEST_ID_FIELD, notNullValue()))
@@ -154,8 +155,8 @@ class ClearSolutionsTestTaskApplicationTests {
     @Test
     @Order(2)
     void testGetNonExistenceUserById() throws Exception {
-        mockMvc.perform(
-                        get(USERS_PATH + ID_PATH, idForNonExistenceUser))
+        mockMvc.perform(get(USERS_PATH + ID_PATH, idForNonExistenceUser)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(result -> assertInstanceOf(UserNotFoundException.class, result.getResolvedException()))
@@ -165,10 +166,10 @@ class ClearSolutionsTestTaskApplicationTests {
     @Test
     @Order(3)
     void testGetUsersByBirthDateRange() throws Exception {
-        mockMvc.perform(
-                        get(USERS_PATH)
-                                .param(FROM_DATE, LocalDate.of(1992, 1, 1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                                .param(TO_DATE, LocalDate.of(1995, 1, 1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+        mockMvc.perform(get(USERS_PATH)
+                        .param(FROM_DATE, LocalDate.of(1992, 1, 1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                        .param(TO_DATE, LocalDate.of(1995, 1, 1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath(DOLLAR_SIGN, hasSize(2)))
@@ -191,10 +192,10 @@ class ClearSolutionsTestTaskApplicationTests {
     @Test
     @Order(4)
     void testGetUsersByBirthDateRangeCheckToDateBiggerThatFromDate() throws Exception {
-        mockMvc.perform(
-                        get(USERS_PATH)
-                                .param(FROM_DATE, LocalDate.of(1995, 1, 1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                                .param(TO_DATE, LocalDate.of(1992, 1, 1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+        mockMvc.perform(get(USERS_PATH)
+                        .param(FROM_DATE, LocalDate.of(1995, 1, 1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                        .param(TO_DATE, LocalDate.of(1992, 1, 1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(result -> assertInstanceOf(BadDateException.class, result.getResolvedException()))
@@ -204,10 +205,10 @@ class ClearSolutionsTestTaskApplicationTests {
     @Test
     @Order(5)
     void testGetUsersByBirthDateRangeSameDate() throws Exception {
-        mockMvc.perform(
-                        get(USERS_PATH)
-                                .param(FROM_DATE, LocalDate.of(1992, 6, 15).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                                .param(TO_DATE, LocalDate.of(1992, 6, 15).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+        mockMvc.perform(get(USERS_PATH)
+                        .param(FROM_DATE, LocalDate.of(1992, 6, 15).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                        .param(TO_DATE, LocalDate.of(1992, 6, 15).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath(DOLLAR_SIGN, hasSize(1)))
@@ -223,10 +224,10 @@ class ClearSolutionsTestTaskApplicationTests {
     @Test
     @Order(6)
     void testGetNonExistenceUsersByBirthDateRange() throws Exception {
-        mockMvc.perform(
-                        get(USERS_PATH)
-                                .param(FROM_DATE, LocalDate.of(2010, 1, 1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                                .param(TO_DATE, LocalDate.of(2011, 1, 1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+        mockMvc.perform(get(USERS_PATH)
+                        .param(FROM_DATE, LocalDate.of(2010, 1, 1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                        .param(TO_DATE, LocalDate.of(2011, 1, 1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(result -> assertInstanceOf(UserNotFoundException.class, result.getResolvedException()))
@@ -1145,8 +1146,8 @@ class ClearSolutionsTestTaskApplicationTests {
                 .andExpect(status().isNoContent())
                 .andExpect(content().string(containsString(DELETED_USER + idForUpdateAndDelete + DOT)));
 
-        mockMvc.perform(
-                        get(USERS_PATH + ID_PATH, idForUpdateAndDelete))
+        mockMvc.perform(get(USERS_PATH + ID_PATH, idForUpdateAndDelete)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(result -> assertInstanceOf(UserNotFoundException.class, result.getResolvedException()))
