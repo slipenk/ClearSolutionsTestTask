@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
@@ -39,6 +40,7 @@ import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.VALUE_MUS
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class User {
 
     @Id
@@ -47,7 +49,6 @@ public class User {
     private long id;
 
     @NotNull(message = EMAIL_IS_MANDATORY)
-    @NotBlank(message = EMAIL_IS_MANDATORY)
     @Email(message = EMAIL_IS_NOT_VALID, regexp = REGEX_FOR_EMAIL)
     @Column(name = EMAIL, nullable = false)
     private String email;

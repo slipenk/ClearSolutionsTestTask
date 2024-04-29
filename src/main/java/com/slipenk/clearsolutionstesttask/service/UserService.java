@@ -48,13 +48,18 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public User findById(long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
+    @Transactional(readOnly = true)
     public List<User> getAllUserWithinDateRange(LocalDate fromDate, LocalDate toDate) {
         checkTwoDates(fromDate, toDate);
         return userRepository.findByBirthDateBetween(fromDate, toDate);
     }
 
     private void checkTwoDates(LocalDate fromDate, LocalDate toDate) {
-        if (!fromDate.isBefore(toDate)) {
+        if (toDate.isBefore(fromDate)) {
             throw new BadDateException(DATE_MUST_BE_EARLIER);
         }
     }
@@ -78,18 +83,9 @@ public class UserService {
         return age.getYears() >= userAge;
     }
 
-    @Transactional(readOnly = true)
-    public User findById(long id) {
-        return userRepository.findById(id).orElse(null);
-    }
-
     @Transactional
-    public void deleteById(long id) {
-        userRepository.deleteById(id);
-    }
-
-    public User applyPatchToCustomer(JsonPatch patch, User userPatched) throws JsonPatchException, JsonProcessingException, MethodArgumentNotValidException, NoSuchMethodException {
-        JsonNode patched = patch.apply(objectMapper.convertValue(userPatched, JsonNode.class));
+    public User applyPatchToCustomer(JsonPatch patch, User ourUser) throws JsonPatchException, JsonProcessingException, MethodArgumentNotValidException, NoSuchMethodException {
+        JsonNode patched = patch.apply(objectMapper.convertValue(ourUser, JsonNode.class));
         User user = objectMapper.treeToValue(patched, User.class);
         validateUser(user);
         return saveUser(user);
@@ -104,4 +100,8 @@ public class UserService {
         }
     }
 
+    @Transactional
+    public void deleteById(long id) {
+        userRepository.deleteById(id);
+    }
 }

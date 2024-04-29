@@ -32,6 +32,7 @@ import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.DOT;
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.ID_PATH;
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.LOCATION;
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.SLASH;
+import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.USERS_NOT_FOUND;
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.USERS_PATH;
 import static com.slipenk.clearsolutionstesttask.dictionary.Dictionary.USER_ID_NOT_FOUND;
 
@@ -49,6 +50,9 @@ public class UserController {
     @GetMapping(ID_PATH)
     public ResponseEntity<User> getUser(@PathVariable long id) {
         User ourUser = userService.findById(id);
+        if (ourUser == null) {
+            throw new UserNotFoundException(USER_ID_NOT_FOUND + id + DOT);
+        }
         return ResponseEntity.status(HttpStatus.OK)
                 .header(LOCATION, USERS_PATH + SLASH + ourUser.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -59,8 +63,10 @@ public class UserController {
     public ResponseEntity<List<User>> getAllUserWithinDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
-
         List<User> users = userService.getAllUserWithinDateRange(fromDate, toDate);
+        if (users.isEmpty()) {
+            throw new UserNotFoundException(USERS_NOT_FOUND);
+        }
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(users);
@@ -113,5 +119,4 @@ public class UserController {
             throw new UserNotFoundException(USER_ID_NOT_FOUND + id + DOT);
         }
     }
-
 }
